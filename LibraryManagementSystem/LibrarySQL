@@ -1,0 +1,90 @@
+-- Amy o leary
+-- R00246749
+-- This is my own work 
+
+USE libaray;
+
+CREATE TABLE Books_info (
+  Title varchar(40) NOT NULL,
+  author varchar(40) NOT NULL,
+  genre varchar(16) NOT NULL,
+  year INT,
+  PRIMARY KEY (Title),
+  CONSTRAINT BookGenres CHECK (genre IN ('Fiction', 'Crime', 'True Stories', 'History', 'Biographies', 'Romance', 'Sport', 'Computer Science'))
+);
+
+CREATE TABLE members (
+  Member_Number INT NOT NULL CHECK (Member_Number > 0),
+  Contact varchar(320) NOT NULL CHECK (Contact LIKE '%@%.%'),
+  member_type varchar(5) NOT NULL CHECK (member_type IN ('child', 'adult')),
+  PRIMARY KEY (Member_Number)
+);
+
+CREATE TABLE loans (
+  Record_Number INT CHECK (Record_Number > 0),
+  Member_Number INT NOT NULL,
+  Title varchar(40) NOT NULL,
+  Date date,
+  PRIMARY KEY (Record_Number),
+  FOREIGN KEY (Member_Number) REFERENCES members(Member_Number),
+  FOREIGN KEY (Title) REFERENCES Books_info(Title)
+);
+
+CREATE TABLE book_returns (
+  returns_ID INT CHECK (returns_ID > 0), 
+  Record_Number INT CHECK (Record_Number > 0),
+  Borrow_Date DATE,
+  Return_Date DATE,
+  Penalty DECIMAL(10,2),
+  PRIMARY KEY (returns_ID),
+  FOREIGN KEY (Record_Number) REFERENCES loans(Record_Number)
+);
+
+INSERT INTO members VALUES(123, 'andrew@gmail.com', 'adult');
+INSERT INTO members VALUES(124, 'elon@gmail.com', 'child');
+INSERT INTO members VALUES(125, 'tim@gmail.com', 'adult');
+INSERT INTO members VALUES(126, 'tom@gmail.com', 'adult');
+
+INSERT INTO Books_info VALUES('Moon Whispers','Luna Nightingale','Fiction',2018);
+INSERT INTO Books_info VALUES('Sock Saga','Penelope Knitwel','Crime',2016);
+INSERT INTO Books_info VALUES('Quantum Cuisine','Dr. Harold Flavorson','Computer Science',2024);
+INSERT INTO Books_info VALUES('Nap Mastery','Professor Siesta Snooze','Biographies',2013);
+
+INSERT INTO loans VALUES(56,123,'Nap Mastery','2024-04-11');
+INSERT INTO loans VALUES(57,124,'Quantum Cuisine','2024-04-13');
+INSERT INTO loans VALUES(58,125,'Moon Whispers','2024-04-15');
+INSERT INTO loans VALUES(59,126,'Sock Saga','2024-04-18');
+
+INSERT INTO book_returns VALUES(56,56,'2024-04-11','2024-04-20',0);
+INSERT INTO book_returns VALUES(57,57,'2024-04-13','2024-04-21',0);
+INSERT INTO book_returns VALUES(58,58,'2024-04-15','2024-04-22',0);
+INSERT INTO book_returns VALUES(59,59,'2024-04-18','2024-07-23',120.0);
+
+SELECT Record_Number, Member_Number FROM loans;
+SELECT Email , Member_Number FROM members;
+SELECT Title, genre FROM Books_info;
+SELECT returns_ID, Borrow_Date FROM book_returns;
+
+-- Query 1: Join loans and members tables
+SELECT loans.Record_Number, loans.Member_Number, members.Contact
+FROM loans
+JOIN members ON loans.Member_Number = members.Member_Number; 
+
+-- Query 2: Join loans, Books_info, and members tables
+SELECT loans.Record_Number, loans.Member_Number, members.Contact, Books_info.Title, Books_info.genre
+FROM loans
+JOIN Books_info ON loans.Title = Books_info.Title
+JOIN members ON loans.Member_Number = members.Member_Number;
+
+-- Query 3: Join loans, book_returns, and members tables
+SELECT loans.Record_Number, loans.Member_Number, members.Contact, book_returns.returns_ID, book_returns.Borrow_Date, book_returns.Return_Date, book_returns.Penalty
+FROM loans
+JOIN book_returns ON loans.Record_Number = book_returns.Record_Number
+JOIN members ON loans.Member_Number = members.Member_Number;
+
+-- Query 4: Join loans, book_returns, Books_info, and members tables
+SELECT loans.Record_Number, loans.Member_Number, members.Contact, book_returns.returns_ID, book_returns.Borrow_Date, book_returns.Return_Date, book_returns.Penalty, Books_info.Title, Books_info.genre
+FROM loans
+JOIN book_returns ON loans.Record_Number = book_returns.Record_Number
+JOIN Books_info ON loans.Title = Books_info.Title
+JOIN members ON loans.Member_Number = members.Member_Number;  
